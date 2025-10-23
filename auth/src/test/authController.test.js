@@ -14,6 +14,7 @@ describe("User Authentication", () => {
   before(async function() {
     app = new App();
     await app.connectDB();
+    await User.deleteOne({ username: "testuser" });
   });
 
   after(async function() {
