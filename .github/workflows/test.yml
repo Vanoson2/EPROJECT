@@ -6,23 +6,15 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  test_auth:
     runs-on: ubuntu-latest
-    env:
-      DOCKER_USERNAME: 3002tad
-    services:
-      mongodb:
-        image: mongo:latest
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
     - name: Checkout code
       uses: actions/checkout@v3.2.0
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
     - name: Create .env file
       run: |
         echo "MONGODB_AUTH_URI=mongodb://localhost:27017/auth_test" >> auth/.env
@@ -38,60 +30,16 @@ jobs:
         npm ci --prefix auth
         npm ci --prefix product
         npm ci
-    - name: Run tests for auth
-      run : |
-        cd auth
-        npm test
-    - name: Run tests for product
+    - name: Start Auth service
       run: |
-        cd auth
-        npm start &
-        sleep 5
-        # Test if auth service is ready
-        timeout 30 bash -c 'until curl -f http://localhost:3000/dashboard 2>/dev/null; do sleep 1; done' || echo "Auth service might not be ready"
-        # Create test user for product tests
-        curl -X POST http://localhost:3000/register \
+        cd auth && npm start &
+        timeout 60 bash -c 'until curl -s http://localhost:3000/dashboard > /dev/null; do sleep 2; done'
+    - name: Setup test user
+      run: |
+        curl -s -X POST http://localhost:3000/register \
           -H "Content-Type: application/json" \
-          -d '{"username":"'${{ secrets.LOGIN_TEST_USER }}'","password":"'${{ secrets.LOGIN_TEST_PASSWORD }}'"}' || echo "User might already exist"
-        # Test login to verify JWT
-        echo "Testing login..."
-        LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3000/login \
-          -H "Content-Type: application/json" \
-          -d '{"username":"'${{ secrets.LOGIN_TEST_USER }}'","password":"'${{ secrets.LOGIN_TEST_PASSWORD }}'"}')
-        echo "Login response: $LOGIN_RESPONSE"
-        cd ../product
-        npm test
-
-  build-and-push:
-    needs: test
-    runs-on: ubuntu-latest
-    env:
-      DOCKER_USERNAME: 3002tad
-    strategy:
-      matrix:
-        service: [auth, product, order, api-gateway]
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3.2.0    
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      with:
-        install: true
-      
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ env.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./${{ matrix.service }}
-        file: ./${{ matrix.service }}/Dockerfile
-        push: true
-        tags: 3002tad/eproject-${{ matrix.service }}:latest
-        platforms: linux/amd64
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+          -d '{"username":"'${{ secrets.LOGIN_TEST_USER }}'","password":"'${{ secrets.LOGIN_TEST_PASSWORD }}'"}'
+    - name: Run tests
+      run: |
+        npm test --prefix auth
+        npm test --prefix product
