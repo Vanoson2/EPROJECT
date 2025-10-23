@@ -36,6 +36,10 @@ describe("Products", () => {
 
       authToken = authRes.body.token;
       console.log("Auth token:", authToken);
+      console.log("Auth response status:", authRes.status); // ✅ Debug
+      console.log("Auth response body:", authRes.body); // ✅ Debug
+      console.log("Auth token:", authToken); // ✅ Debug
+      console.log("Token exists:", !!authToken)
     } catch (error) {
       console.error("Failed to authenticate:", error.message);
       authToken = undefined;
