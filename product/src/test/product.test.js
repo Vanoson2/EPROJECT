@@ -14,6 +14,9 @@ describe("Products", () => {
   before(async function() {
     app = new App();
     await app.connectDB();
+    console.log("LOGIN_TEST_USER:", process.env.LOGIN_TEST_USER);
+    console.log("LOGIN_TEST_PASSWORD:", process.env.LOGIN_TEST_PASSWORD ? "***" : "MISSING");
+    
     try {
       await chai
         .request("http://localhost:3000")
