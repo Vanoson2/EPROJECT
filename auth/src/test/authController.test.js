@@ -2,6 +2,7 @@ const chai = require("chai");
 const chaiHttp = require("chai-http");
 const App = require("../app");
 const User = require("../models/user");
+const user = require("../models/user");
 require("dotenv").config();
 
 
@@ -15,10 +16,10 @@ describe("User Authentication", () => {
   before(async function() {
     app = new App();
     await app.connectDB();
-    await User.deleteOne({ username: "testuser" });
   });
 
   after(async function() {
+    await user.deleteOne({ username: "testuser" });
     await app.disconnectDB();
   });
 
