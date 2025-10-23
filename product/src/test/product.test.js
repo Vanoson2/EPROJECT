@@ -12,18 +12,48 @@ describe("Products", () => {
   let createdProductId;
 
   before(async function() {
+    this.timeout(15000); // ✅ Tăng timeout
+    
     app = new App();
     await app.connectDB();
+    
     console.log("LOGIN_TEST_USER:", process.env.LOGIN_TEST_USER);
     console.log("LOGIN_TEST_PASSWORD:", process.env.LOGIN_TEST_PASSWORD ? "***" : "MISSING");
+    
+    // ✅ Thêm try-catch và debug chi tiết
+    try {
+      console.log("Calling login API...");
       const authRes = await chai
         .request("http://localhost:3000")
         .post("/login")
         .send({ 
           username: process.env.LOGIN_TEST_USER, 
-          password: process.env.LOGIN_TEST_PASSWORD });
+          password: process.env.LOGIN_TEST_PASSWORD 
+        });
+      
+      console.log("Login response status:", authRes.status);
+      console.log("Login response body:", JSON.stringify(authRes.body, null, 2));
+      
       authToken = authRes.body.token;
-      app.start();
+      
+      if (!authToken) {
+        console.error("❌ TOKEN IS UNDEFINED!");
+        console.error("Response keys:", Object.keys(authRes.body));
+        throw new Error("Token not found in response");
+      }
+      
+      console.log("✓ Token received (length):", authToken.length);
+      console.log("✓ Token preview:", authToken.substring(0, 50) + "...");
+      
+    } catch (error) {
+      console.error("❌ Login failed!");
+      console.error("Error status:", error.status);
+      console.error("Error message:", error.message);
+      console.error("Error response:", error.response?.body);
+      throw error;
+    }
+    
+    app.start();
   });
 
   after(async function() {
@@ -33,11 +63,17 @@ describe("Products", () => {
 
   describe("POST /", () => {
     it("should create a new product with valid data", async () => {
+      // ✅ Kiểm tra token trước khi test
+      if (!authToken) {
+        throw new Error("authToken is undefined - cannot run test");
+      }
+      
       const product = {
         name: "Product 1",
         description: "Description of Product 1",
         price: 10,
       };
+      
       const res = await chai
         .request(app.app)
         .post("/")
