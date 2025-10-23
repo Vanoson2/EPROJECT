@@ -15,6 +15,18 @@ describe("Products", () => {
     app = new App();
     await app.connectDB();
     // Skip message broker setup for simplified tests
+    try {
+      await chai
+        .request("http://localhost:3000")
+        .post("/register")
+        .send({ 
+          username: process.env.LOGIN_TEST_USER, 
+          password: process.env.LOGIN_TEST_PASSWORD 
+        });
+      console.log("Test user registered");
+    } catch (error) {
+      console.log("Test user already exists");
+    }
 
     try {
       const authRes = await chai
