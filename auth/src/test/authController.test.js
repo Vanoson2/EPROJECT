@@ -11,14 +11,12 @@ describe("User Authentication", () => {
   let app;
   let authToken;
 
-  before(async () => {
-    app = new App();
+  before(async function() {
     await app.connectDB();
     app.start();
   });
 
-  after(async () => {
-    await app.authController.authService.deleteTestUsers();
+  after(async function() {
     await app.disconnectDB();
     app.stop();
   });
