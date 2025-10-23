@@ -16,19 +16,6 @@ describe("Products", () => {
     await app.connectDB();
     console.log("LOGIN_TEST_USER:", process.env.LOGIN_TEST_USER);
     console.log("LOGIN_TEST_PASSWORD:", process.env.LOGIN_TEST_PASSWORD ? "***" : "MISSING");
-    
-    try {
-      await chai
-        .request("http://localhost:3000")
-        .post("/register")
-        .send({ 
-          username: process.env.LOGIN_TEST_USER, 
-          password: process.env.LOGIN_TEST_PASSWORD 
-        });
-      console.log("✓ User registered");
-    } catch (error) {
-      console.log("✓ User already exists");
-    }
       const authRes = await chai
         .request("http://localhost:3000")
         .post("/login")
