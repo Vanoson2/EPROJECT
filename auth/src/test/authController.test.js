@@ -14,12 +14,10 @@ describe("User Authentication", () => {
   before(async function() {
     app = new App();
     await app.connectDB();
-    app.start();
   });
 
   after(async function() {
     await app.disconnectDB();
-    app.stop();
   });
 
   describe("POST /register", () => {
