@@ -14,6 +14,18 @@ describe("Products", () => {
   before(async function() {
     app = new App();
     await app.connectDB();
+    try {
+      await chai
+        .request("http://localhost:3000")
+        .post("/register")
+        .send({ 
+          username: process.env.LOGIN_TEST_USER, 
+          password: process.env.LOGIN_TEST_PASSWORD 
+        });
+      console.log("✓ User registered");
+    } catch (error) {
+      console.log("✓ User already exists");
+    }
       const authRes = await chai
         .request("http://localhost:3000")
         .post("/login")
@@ -21,10 +33,12 @@ describe("Products", () => {
           username: process.env.LOGIN_TEST_USER, 
           password: process.env.LOGIN_TEST_PASSWORD });
       authToken = authRes.body.token;
+      app.start();
   });
 
   after(async function() {
     await app.disconnectDB();
+    app.stop();
   });
 
   describe("POST /", () => {
