@@ -11,7 +11,7 @@ describe("Products", () => {
   let authToken;
   let createdProductId;
 
-  before(async () => {
+  before(async function() {
     app = new App();
     await app.connectDB();
     // Skip message broker setup for simplified tests
@@ -40,13 +40,10 @@ describe("Products", () => {
       console.error("Failed to authenticate:", error.message);
       authToken = undefined;
     }
-    
-    app.start();
   });
 
-  after(async () => {
+  after(async function() {
     await app.disconnectDB();
-    app.stop();
   });
 
   describe("POST /", () => {
