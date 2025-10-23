@@ -14,36 +14,13 @@ describe("Products", () => {
   before(async function() {
     app = new App();
     await app.connectDB();
-    // Skip message broker setup for simplified tests
-    try {
-      await chai
-        .request("http://localhost:3000")
-        .post("/register")
-        .send({ 
-          username: process.env.LOGIN_TEST_USER, 
-          password: process.env.LOGIN_TEST_PASSWORD 
-        });
-      console.log("Test user registered");
-    } catch (error) {
-      console.log("Test user already exists");
-    }
-
-    try {
       const authRes = await chai
         .request("http://localhost:3000")
         .post("/login")
-        .send({ username: process.env.LOGIN_TEST_USER, password: process.env.LOGIN_TEST_PASSWORD });
-
+        .send({ 
+          username: process.env.LOGIN_TEST_USER, 
+          password: process.env.LOGIN_TEST_PASSWORD });
       authToken = authRes.body.token;
-      console.log("Auth token:", authToken);
-      console.log("Auth response status:", authRes.status); // ✅ Debug
-      console.log("Auth response body:", authRes.body); // ✅ Debug
-      console.log("Auth token:", authToken); // ✅ Debug
-      console.log("Token exists:", !!authToken)
-    } catch (error) {
-      console.error("Failed to authenticate:", error.message);
-      authToken = undefined;
-    }
   });
 
   after(async function() {
