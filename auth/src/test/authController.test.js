@@ -15,6 +15,15 @@ describe("User Authentication", () => {
   before(async function() {
     app = new App();
     await app.connectDB();
+    const authRes = await chai
+    .request("http://localhost:3000") 
+    .post("/login")
+    .send({ 
+      username: process.env.LOGIN_TEST_USER, 
+      password: process.env.LOGIN_TEST_PASSWORD 
+    });
+
+  authToken = authRes.body.token; 
     await User.deleteOne({ username: "testuser" });
   });
 
