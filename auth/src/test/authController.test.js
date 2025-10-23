@@ -12,6 +12,7 @@ describe("User Authentication", () => {
   let authToken;
 
   before(async function() {
+    app = new App();
     await app.connectDB();
     app.start();
   });
