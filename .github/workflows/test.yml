@@ -41,10 +41,10 @@ jobs:
         cd auth && npm start &
         timeout 60 bash -c 'until curl -s http://localhost:3000/dashboard > /dev/null; do sleep 2; done'
     - name: Setup test user
-      run: |
-        curl -s -X POST http://localhost:3000/register \
+        run: |
+          curl -X POST http://localhost:3000/register \
           -H "Content-Type: application/json" \
-          -d '{"username":"'${{ secrets.LOGIN_TEST_USER }}'","password":"'${{ secrets.LOGIN_TEST_PASSWORD }}'"}'
+          -d '{"username":"${{ secrets.LOGIN_TEST_USER }}","password":"${{ secrets.LOGIN_TEST_PASSWORD }}"}'
     - name: Run tests
       run: |
         npm test --prefix auth

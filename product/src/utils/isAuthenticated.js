@@ -18,7 +18,8 @@ function isAuthenticated(req, res, next) {
   try {
     // Verify the token using the JWT library and the secret key
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decodedToken;
+    req.userId = decodedToken.userId;
+    req.user = decodedToken.username;
     next();
   } catch (err) {
     console.error("JWT Error:", err.message);
